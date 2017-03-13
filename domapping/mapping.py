@@ -197,6 +197,27 @@ def _gen_type_properties(json_schema, path, resolver, config, es_mapping):
                     yield d[k]
 
     # resolve reference if there are any
+
+    def dict_search_and_retrieve(d, key=None):
+        """
+        Get the values associated to a specific key in nested dicts.
+
+        :param d: Dictionnary to explore.
+        :type d: dict
+        :param key: Key to look value for. If None, returns all values.
+        :type key: str
+        :return: A list containing the value associated to Key.
+        :rtype: list
+        """
+        values = []
+        for k in d.keys():
+            if isinstance(d[k], dict):
+                values += dict_search_and_retrieve(d[k], key)
+            else:
+                if (key and k == key) or not key:
+                    values.append(d[k])
+        return values
+
     while '$ref' in json_schema:
         path = json_schema.get('$ref')
         json_schema = resolver.resolve(path)[1]
